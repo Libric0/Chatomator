@@ -32,9 +32,28 @@ public class ChatServer extends Server {
 			redirectMessage(pMessage);
 		} else if (pMessage.startsWith("GMsg:")) {
 			redirectGroupMessage(pMessage);
+		} else if (pMessage.startsWith("ToGroup:")){
+			addUserToGroup(pClientIP,pClientPort,Integer.parseInt(pMessage.substring(7)));
+		} else if (pMessage.startsWith("GetAllMessages:")){
+			getAllMessages(pClientIP,pClientPort);
+		} else if (pMessage.startsWith("GetAllGroupMessages:")){
+			getAllGroupMessages(pClientIP,pClientPort);
 		}
 	}
-
+	private void addUserToGroup(String pClientIP, int pClientPort, int pGroupID){
+	dbm.addUserToGroup(getActiveUsername(pClientIP,pClientPort), pGroupID);
+	send(pClientIP,pClientPort,"Added:"+pGroupID);
+	}
+	private void getAllMessages(String pClientIP, int pClientPort){
+		for( Message m : dbm.getAllMessages(getActiveUsername(pClientIP,pClientPort))){
+			send(pClientIP, pClientPort, m.toString());
+		}
+	}
+	private void getAllGroupMessages(String pClientIP, int pClientPort){
+		for( GroupMessage m : dbm.getAllGroupMessages(getActiveUsername(pClientIP,pClientPort))){
+			send(pClientIP, pClientPort, m.toString());
+		}
+	}
 	private void redirectGroupMessage(String pMessage) {
 		// TODO das is ne aufgabe für zukunfts-Philipp
 		GroupMessage msg = GroupMessage.fromString(pMessage);
